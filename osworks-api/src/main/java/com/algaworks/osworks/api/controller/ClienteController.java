@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.algaworks.osworks.domain.model.Cliente;
 import com.algaworks.osworks.domain.repository.ClienteRepository;
+import com.algaworks.osworks.domain.service.CadastroClienteService;
 
 @RestController
 @RequestMapping("/clientes")
@@ -30,6 +31,9 @@ public class ClienteController {
 	//EntityManeger eh responsavel pelas operacoes nas entidades, eh uma interface do JakartaPersistence
 	@PersistenceContext
 	private EntityManager manager;
+	
+	@Autowired
+	private CadastroClienteService cadastroCliente;
 	
 	//O Autowired indica que quer uma instancia da interface ClienteRepository 
 	@Autowired
@@ -85,7 +89,9 @@ public class ClienteController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Cliente adicionar(@Valid @RequestBody Cliente cliente) {
-		return clienteRepository.save(cliente);
+		//return clienteRepository.save(cliente);
+		//no lugar de utilizar uma classe nativa do JAVA, foi implementado uma classe que eh especialista em representar regras de negocio
+		return cadastroCliente.salvar(cliente);
 	}
 	
 	@PutMapping("/{clienteId}")
@@ -99,7 +105,9 @@ public class ClienteController {
 		 * id estah nulo, ele compreenderia que precisaria fazer uma nova intancia 
 		 */
 		cliente.setId(clienteId);
-		cliente = clienteRepository.save(cliente);
+		//cliente = clienteRepository.save(cliente);
+		cliente = cadastroCliente.salvar(cliente);
+		
 		return ResponseEntity.ok(cliente);
 	}
 	
@@ -108,7 +116,9 @@ public class ClienteController {
 		if(!clienteRepository.existsById(clienteId)) {
 			return ResponseEntity.notFound().build();
 		}
-		clienteRepository.deleteById(clienteId);
+		
+		//clienteRepository.deleteById(clienteId);
+		cadastroCliente.excluir(clienteId);
 		return ResponseEntity.noContent().build();
 	}
 }
