@@ -7,7 +7,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import com.algaworks.osworks.domain.ValidationGroups;
 
 /*
  * Fazendo o mapeamento objeto-relacional, ou seja,
@@ -18,6 +21,12 @@ import javax.validation.constraints.Size;
 public class Cliente {
 
 	//Determinando a chave primaria de forma autoincrementada.
+	/*
+	 * Foi determinado a marcação anteriormente do Grupo na classe
+	 * OrdemServico, para que o NotNull não interfira quando for inserir
+	 * (POST) um novo cliente no banco de dados. 
+	 */
+	@NotNull(groups = ValidationGroups.ClienteId.class)
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

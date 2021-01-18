@@ -10,6 +10,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.groups.ConvertGroup;
+import javax.validation.groups.Default;
+
+import com.algaworks.osworks.domain.ValidationGroups;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 @Entity
 public class OrdemServico {
@@ -18,7 +27,6 @@ public class OrdemServico {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@ManyToOne
 	/*
 	 * Poderia colocar
 	 * @JoinColumn(nome = "cliente_id")
@@ -26,15 +34,39 @@ public class OrdemServico {
 	 * irá colocar na coluna cliente_id, porque eh o nome do
 	 * atributo mais o id.
 	 */
+	@Valid
+	/* Os atributos que estao na classe cliente sao default, 
+	 * mas queremos apenas os atributos que pertence ao cliente quando estiver 
+	 * sendo acessado pela classe OrdemServico
+	 */
+	@ConvertGroup(from = Default.class, to = ValidationGroups.ClienteId.class)
+	@NotNull
+	@ManyToOne
 	private Cliente cliente;
 	
+	@NotBlank
 	private String descricao;
+	
+	@NotNull
 	private BigDecimal preco;
 	
 	//Para exibir o nome ao inves da posicao do enum StatusOrdemServico
+	@JsonProperty(access = Access.READ_ONLY)
 	@Enumerated(EnumType.STRING)
 	private StatusOrdemServico status;
+	
+	@JsonProperty(access = Access.READ_ONLY)
 	private LocalDateTime dataAbertura;
+	
+	/*
+	 * O JsonProperty serve para modificar o acesso de acordo com o
+	 * parametro que esteja no seu método, aqui foi configurado como
+	 * APENAS LEITURA.
+	 * Para evitar que no momento de adicionar uma linha na tabela,
+	 * seja inserido a data de finalização, ao mesmo tempo que deixa
+	 * o Status Ordem de Serviço ABERTA.
+	 */
+	@JsonProperty(access = Access.READ_ONLY)
 	private LocalDateTime dataFinalizacao;
 	public Long getId() {
 		return id;
@@ -78,6 +110,11 @@ public class OrdemServico {
 	public void setDataFinalizacao(LocalDateTime dataFinalizacao) {
 		this.dataFinalizacao = dataFinalizacao;
 	}
+	
+	/*
+	 * Equals e Hash Code gerado pelo Eclipse, serve para garantir que
+	 * as chaves primárias (id) não sejam iguais.
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
